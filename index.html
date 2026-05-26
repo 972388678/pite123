@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>会员卡管理系统-权限版（最终版）</title>
+    <title>会员卡管理系统 - 云端版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -225,6 +225,7 @@
             </div>
         </main>
 
+        <!-- 添加会员弹窗 -->
         <div id="addMemberModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
             <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
                 <h3 class="text-lg font-bold mb-4">添加会员</h3>
@@ -261,9 +262,10 @@
             </div>
         </div>
 
+        <!-- 编辑会员弹窗 -->
         <div id="editMemberModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
             <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
-                <h3 class="text-lg font-bold mb-4">编辑会员信息</h3>
+                <h3 class="text-lg font-bold mb-4">编辑会员</h3>
                 <form id="editMemberForm">
                     <input type="hidden" id="editMemberId">
                     <div class="mb-3">
@@ -276,27 +278,19 @@
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm mb-1">会员卡密码</label>
-                        <input type="text" id="editMemberPwd" class="input-field" placeholder="仅记录，无登录功能">
+                        <input type="text" id="editMemberPwd" class="input-field">
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm mb-1">使用范围</label>
-                        <input type="text" id="editMemberScope" class="input-field" placeholder="例如：仅限XX门店使用">
+                        <input type="text" id="editMemberScope" class="input-field">
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm mb-1">会员卡类型</label>
                         <select id="editMemberTypeSelect" class="input-field" required></select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="block text-sm mb-1">账户余额</label>
                         <input type="number" id="editMemberBalance" class="input-field" min="0" required>
-                    </div>
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div><label class="block text-sm mb-1">果盘</label><input type="number" id="editFruit" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">小吃</label><input type="number" id="editSnack" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">基础酒水</label><input type="number" id="editDrink1" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">中级酒水</label><input type="number" id="editDrink2" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">高级酒水</label><input type="number" id="editDrink3" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">顶级酒水</label><input type="number" id="editDrink4" class="input-field" min="0"></div>
                     </div>
                     <div class="flex gap-3 justify-end">
                         <button type="button" class="close-modal btn-outline">取消</button>
@@ -306,31 +300,46 @@
             </div>
         </div>
 
-        <div id="addMemberTypeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-            <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5">
-                <h3 class="text-lg font-bold mb-4">编辑会员卡权益</h3>
-                <form id="addMemberTypeForm">
+        <!-- 添加卡类型弹窗 -->
+        <div id="addTypeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">新增会员卡类型</h3>
+                <form id="addTypeForm">
                     <div class="mb-3">
-                        <label class="block text-sm mb-1">卡种名称</label>
-                        <input type="text" id="memberTypeName" class="input-field" required>
+                        <label class="block text-sm mb-1">卡名称</label>
+                        <input type="text" id="typeName" class="input-field" required>
                     </div>
                     <div class="mb-3">
-                        <label class="block text-sm mb-1">充值金额(元)</label>
-                        <input type="number" id="memberTypeRecharge" class="input-field" required>
+                        <label class="block text-sm mb-1">使用范围</label>
+                        <input type="text" id="typeScope" class="input-field">
                     </div>
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div><label class="block text-sm mb-1">果盘</label><input type="number" id="typeFruit" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">小吃</label><input type="number" id="typeSnack" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">基础酒水</label><input type="number" id="typeDrink1" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">中级酒水</label><input type="number" id="typeDrink2" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">高级酒水</label><input type="number" id="typeDrink3" class="input-field" min="0"></div>
-                        <div><label class="block text-sm mb-1">顶级酒水</label><input type="number" id="typeDrink4" class="input-field" min="0"></div>
+                    <div class="mb-3 grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm mb-1">果盘赠送次数</label>
+                            <input type="number" id="typeFruit" class="input-field" min="0" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">小吃赠送次数</label>
+                            <input type="number" id="typeSnack" class="input-field" min="0" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">基础酒水</label>
+                            <input type="number" id="typeDrink1" class="input-field" min="0" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">中级酒水</label>
+                            <input type="number" id="typeDrink2" class="input-field" min="0" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">高级酒水</label>
+                            <input type="number" id="typeDrink3" class="input-field" min="0" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">顶级酒水</label>
+                            <input type="number" id="typeDrink4" class="input-field" min="0" value="0">
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm mb-1">备注</label>
-                        <textarea id="memberTypeDesc" class="input-field" rows="2"></textarea>
-                    </div>
-                    <div class="flex gap-3 justify-end">
+                    <div class="flex gap-3 justify-end mt-4">
                         <button type="button" class="close-modal btn-outline">取消</button>
                         <button type="submit" class="btn-primary">保存</button>
                     </div>
@@ -338,6 +347,7 @@
             </div>
         </div>
 
+        <!-- 添加消费项目弹窗 -->
         <div id="addProductModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
             <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
                 <h3 class="text-lg font-bold mb-4">新增消费项目</h3>
@@ -347,60 +357,19 @@
                         <input type="text" id="productName" class="input-field" required>
                     </div>
                     <div class="mb-3">
+                        <label class="block text-sm mb-1">对应权益类型</label>
+                        <select id="productType" class="input-field">
+                            <option value="0">果盘</option>
+                            <option value="1">小吃</option>
+                            <option value="2">基础酒水</option>
+                            <option value="3">中级酒水</option>
+                            <option value="4">高级酒水</option>
+                            <option value="5">顶级酒水</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
                         <label class="block text-sm mb-1">单价</label>
                         <input type="number" id="productPrice" class="input-field" min="0" step="0.01" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm mb-1">对应权益类型</label>
-                        <select id="productRightType" class="input-field">
-                            <option value="">非赠送项目（仅扣余额）</option>
-                            <option value="fruit">精品果盘</option>
-                            <option value="snack">小吃套餐</option>
-                            <option value="drink1">基础酒水套餐</option>
-                            <option value="drink2">中级酒水套餐</option>
-                            <option value="drink3">高级酒水套餐</option>
-                            <option value="drink4">顶级酒水套餐</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-3 justify-end">
-                        <button type="button" class="close-modal btn-outline">取消</button>
-                        <button type="submit" class="btn-primary">保存</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="editProductModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
-                <h3 class="text-lg font-bold mb-4">编辑项目</h3>
-                <form id="editProductForm">
-                    <input type="hidden" id="editProductId">
-                    <div class="mb-3">
-                        <label class="block text-sm mb-1">项目名称</label>
-                        <input type="text" id="editProductName" class="input-field" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm mb-1">单价</label>
-                        <input type="number" id="editProductPrice" class="input-field" min="0" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm mb-1">对应权益类型</label>
-                        <select id="editProductRightType" class="input-field">
-                            <option value="">非赠送项目（仅扣余额）</option>
-                            <option value="fruit">精品果盘</option>
-                            <option value="snack">小吃套餐</option>
-                            <option value="drink1">基础酒水套餐</option>
-                            <option value="drink2">中级酒水套餐</option>
-                            <option value="drink3">高级酒水套餐</option>
-                            <option value="drink4">顶级酒水套餐</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm mb-1">状态</label>
-                        <select id="editProductStatus" class="input-field">
-                            <option value="active">启用</option>
-                            <option value="inactive">停用</option>
-                        </select>
                     </div>
                     <div class="flex gap-3 justify-end">
                         <button type="button" class="close-modal btn-outline">取消</button>
@@ -414,70 +383,80 @@
     </div>
 
     <script>
+        // ========== 已填好你的配置，直接使用 ==========
+        const GIST_ID = "227f80846dfe7e36670dc65d1ef3147e";
+        const GITHUB_TOKEN = "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";
+
         let currentRole = '';
         let members = [];
         let memberTypes = [];
         let products = [];
-        const DOC_URL = "https://docs.qq.com/sheet/DUm5adWtFWG9jTndL";
         const toast = document.getElementById('toast');
 
         document.addEventListener('DOMContentLoaded', async function () {
-            await loadAllDataFromTencentDocs();
+            await loadAllDataFromGist();
             initLogin();
+            bindModalClose();
         });
 
-        async function loadAllDataFromTencentDocs() {
+        // 从Gist读取云端数据
+        async function loadAllDataFromGist() {
             try {
-                members = await fetchSheetData(0);
-                memberTypes = await fetchSheetData(1);
-                products = await fetchSheetData(2);
+                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                });
+                const data = await res.json();
+                const json = JSON.parse(data.files['data.json'].content);
+                
+                members = json.members || [];
+                memberTypes = json.cardTypes || [];
+                products = json.products || [];
 
                 members = members.map(m => ({
                     ...m,
                     id: Number(m.id),
                     balance: Number(m.balance),
-                    rights: {
-                        fruit: Number(m.fruit),
-                        snack: Number(m.snack),
-                        drink1: Number(m.drink1),
-                        drink2: Number(m.drink2),
-                        drink3: Number(m.drink3),
-                        drink4: Number(m.drink4)
-                    }
-                }));
-
-                memberTypes = memberTypes.map(t => ({
-                    ...t,
-                    id: Number(t.id),
-                    recharge: Number(t.recharge),
-                    fruit: Number(t.fruit),
-                    snack: Number(t.snack),
-                    drink1: Number(t.drink1),
-                    drink2: Number(t.drink2),
-                    drink3: Number(t.drink3),
-                    drink4: Number(t.drink4)
-                }));
-
-                products = products.map(p => ({
-                    ...p,
-                    id: Number(p.id),
-                    price: Number(p.price)
+                    fruit: Number(m.fruit || 0),
+                    snack: Number(m.snack || 0),
+                    drink1: Number(m.drink1 || 0),
+                    drink2: Number(m.drink2 || 0),
+                    drink3: Number(m.drink3 || 0),
+                    drink4: Number(m.drink4 || 0)
                 }));
 
                 showSystem();
             } catch (e) {
                 console.error(e);
-                showToast("加载云端数据失败");
+                showToast("加载云端数据失败，请检查网络与Token权限");
             }
         }
 
-        async function fetchSheetData(sheetIndex) {
-            const url = `${DOC_URL}?op=export&format=json&sheet=${sheetIndex}`;
-            const res = await fetch(url);
-            const json = await res.json();
-            return json.data;
+        // 保存数据到Gist云端
+        async function saveDataToGist() {
+            try {
+                const content = JSON.stringify({
+                    members,
+                    cardTypes: memberTypes,
+                    products
+                }, null, 2);
+
+                await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: { "data.json": { content } }
+                    })
+                });
+                showToast("✅ 数据已同步到云端");
+            } catch (e) {
+                showToast("❌ 云端同步失败");
+            }
         }
 
+        // 登录逻辑
         function initLogin() {
             document.getElementById('loginForm').onsubmit = function (e) {
                 e.preventDefault();
@@ -507,475 +486,465 @@
             };
         }
 
+        function limitEmployeePermission() {
+            document.getElementById('addMemberBtn').disabled = true;
+            document.getElementById('addMemberTypeBtn').disabled = true;
+            document.getElementById('addProductBtn').disabled = true;
+        }
+
         function showSystem() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainSystem').classList.remove('hidden');
             initTab();
-            initModal();
             renderAll();
             bindConsumeEvent();
         }
 
-        function limitEmployeePermission() {
-            document.getElementById('tabMemberTypes').classList.add('disabled-tab');
-            document.getElementById('tabProducts').classList.add('disabled-tab');
-            document.getElementById('addMemberBtn').disabled = true;
-            document.getElementById('addMemberBtn').classList.add('disabled-btn');
-            document.getElementById('tabConsume').click();
-            renderMember(members);
-        }
-
+        // 标签页切换
         function initTab() {
-            const tabs = document.querySelectorAll('.tab-btn');
+            const btns = document.querySelectorAll('.tab-btn');
             const contents = document.querySelectorAll('.tab-content');
-            tabs.forEach(btn => {
+            btns.forEach(btn => {
                 btn.onclick = function () {
-                    let t = this.dataset.tab;
-                    tabs.forEach(b => { b.classList.remove('tab-active'); b.classList.add('text-gray-600'); });
-                    this.classList.add('tab-active'); this.classList.remove('text-gray-600');
+                    const target = this.dataset.tab;
+                    btns.forEach(b => {
+                        b.classList.remove('tab-active');
+                        b.classList.add('text-gray-600');
+                    });
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-600');
                     contents.forEach(c => c.classList.add('hidden'));
-                    document.getElementById(t).classList.remove('hidden');
-                    if (t === 'consume') { fillConsumeMember(); fillConsumeProduct(); calcTotal(); }
-                }
-            })
+                    document.getElementById(target).classList.remove('hidden');
+                };
+            });
         }
 
-        function initModal() {
+        // 关闭弹窗
+        function bindModalClose() {
             document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.onclick = () => { document.querySelectorAll('.fixed.inset-0').forEach(m => m.classList.add('hidden')); }
-            })
+                btn.onclick = function () {
+                    this.closest('.fixed').classList.add('hidden');
+                };
+            });
         }
 
+        // 整体渲染
         function renderAll() {
             renderMemberType();
             fillMemberTypeSelect();
             renderMember();
             renderProduct();
+            fillConsumeMember();
         }
 
+        // 渲染卡类型列表
+        function renderMemberType() {
+            const box = document.getElementById('memberTypeList');
+            let html = '';
+            memberTypes.forEach(item => {
+                html += `
+                <div class="border rounded-lg p-4">
+                    <div class="font-bold text-lg">${item.name}</div>
+                    <div class="text-sm text-gray-600 mt-1">使用范围：${item.scope || '无'}</div>
+                    <div class="grid grid-cols-3 gap-2 mt-3 text-sm">
+                        <div>果盘：${item.fruit}</div>
+                        <div>小吃：${item.snack}</div>
+                        <div>基础酒水：${item.drink1}</div>
+                        <div>中级酒水：${item.drink2}</div>
+                        <div>高级酒水：${item.drink3}</div>
+                        <div>顶级酒水：${item.drink4}</div>
+                    </div>
+                </div>`;
+            });
+            box.innerHTML = html;
+        }
+
+        // 填充卡类型下拉框
+        function fillMemberTypeSelect() {
+            const s1 = document.getElementById('memberTypeSelect');
+            const s2 = document.getElementById('editMemberTypeSelect');
+            let opt = '<option value="">请选择卡类型</option>';
+            memberTypes.forEach(t => {
+                opt += `<option value="${t.id}">${t.name}</option>`;
+            });
+            s1.innerHTML = opt;
+            s2.innerHTML = opt;
+        }
+
+        // 渲染会员列表
         function renderMember(list = members) {
             const box = document.getElementById('memberList');
             const empty = document.getElementById('noMembers');
-            if (list.length === 0) { box.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            if (list.length === 0) {
+                box.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
             empty.classList.add('hidden');
             let html = '';
             list.forEach(m => {
-                let r = m.rights || { fruit: 0, snack: 0, drink1: 0, drink2: 0, drink3: 0, drink4: 0 };
-                let operateBtn = '';
+                let operate = '';
                 if (currentRole === 'boss') {
-                    operateBtn = `<button class="btn-outline py-1 px-3 text-xs" onclick="editMember(${m.id})">编辑</button>
-                    <button class="btn-danger py-1 px-3 text-xs" onclick="delMember(${m.id})">删除</button>`;
+                    operate = `
+                        <button class="btn-outline py-1 px-3 text-xs" onclick="openEditMember(${m.id})">编辑</button>
+                        <button class="btn-danger py-1 px-3 text-xs" onclick="delMember(${m.id})">删除</button>
+                    `;
                 }
-                html += `<tr class="border-b hover:bg-gray-50">
-                <td class="py-3 px-4">${m.name}<br><span class="text-xs text-gray-500">${m.phone}</span></td>
-                <td class="py-3 px-4"><span class="badge badge-blue">${m.typeName}</span></td>
-                <td class="py-3 px-4">${m.pwd || '-'}</td>
-                <td class="py-3 px-4">${m.scope || '-'}</td>
-                <td class="py-3 px-4 font-medium">¥${m.balance.toFixed(2)}</td>
-                <td class="py-3 px-4">${r.fruit}</td>
-                <td class="py-3 px-4">${r.snack}</td>
-                <td class="py-3 px-4">${r.drink1}</td>
-                <td class="py-3 px-4">${r.drink2}</td>
-                <td class="py-3 px-4">${r.drink3}</td>
-                <td class="py-3 px-4">${r.drink4}</td>
-                <td class="py-3 px-4 text-right">${operateBtn}</td>
+                html += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">${m.name}<br><span class="text-xs text-gray-500">${m.phone}</span></td>
+                    <td class="py-3 px-4"><span class="badge badge-blue">${m.typeName}</span></td>
+                    <td class="py-3 px-4">${m.pwd || '-'}</td>
+                    <td class="py-3 px-4">${m.scope || '-'}</td>
+                    <td class="py-3 px-4 font-medium">¥${Number(m.balance).toFixed(2)}</td>
+                    <td class="py-3 px-4">${m.fruit}</td>
+                    <td class="py-3 px-4">${m.snack}</td>
+                    <td class="py-3 px-4">${m.drink1}</td>
+                    <td class="py-3 px-4">${m.drink2}</td>
+                    <td class="py-3 px-4">${m.drink3}</td>
+                    <td class="py-3 px-4">${m.drink4}</td>
+                    <td class="py-3 px-4 text-right">${operate}</td>
                 </tr>`;
             });
             box.innerHTML = html;
         }
 
+        // 渲染消费项目
+        function renderProduct() {
+            const box = document.getElementById('productList');
+            const empty = document.getElementById('noProducts');
+            if (products.length === 0) {
+                box.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            const typeMap = ['果盘','小吃','基础酒水','中级酒水','高级酒水','顶级酒水'];
+            let html = '';
+            products.forEach(p => {
+                html += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">${p.name}</td>
+                    <td class="py-3 px-4">¥${Number(p.price).toFixed(2)}</td>
+                    <td class="py-3 px-4">${typeMap[p.type]}</td>
+                    <td class="py-3 px-4"><span class="badge badge-success">正常</span></td>
+                    <td class="py-3 px-4 text-right">
+                        <button class="btn-danger py-1 px-3 text-xs" onclick="delProduct(${p.id})">删除</button>
+                    </td>
+                </tr>`;
+            });
+            box.innerHTML = html;
+        }
+
+        // 消费页填充会员下拉
+        function fillConsumeMember() {
+            const sel = document.getElementById('consumeMemberSelect');
+            let opt = '<option value="">请选择会员</option>';
+            members.forEach(m => {
+                opt += `<option value="${m.id}">${m.name} - ${m.phone}</option>`;
+            });
+            sel.innerHTML = opt;
+        }
+
+        // 新增会员
         document.getElementById('addMemberForm').onsubmit = async function (e) {
             e.preventDefault();
-            let name = document.getElementById('memberName').value.trim();
-            let phone = document.getElementById('memberPhone').value.trim();
-            let pwd = document.getElementById('memberPwd').value.trim();
-            let scope = document.getElementById('memberScope').value.trim();
-            let typeId = +document.getElementById('memberTypeSelect').value;
-            let balance = +document.getElementById('memberBalance').value;
-            let type = memberTypes.find(t => t.id === typeId);
-            let newId = Date.now();
-            members.push({
-                id: newId, name, phone, pwd, scope, typeId, typeName: type.name, balance,
-                rights: { fruit: type.fruit, snack: type.snack, drink1: type.drink1, drink2: type.drink2, drink3: type.drink3, drink4: type.drink4 }
-            });
-            await syncMembersToCloud();
-            renderMember();
+            const name = document.getElementById('memberName').value.trim();
+            const phone = document.getElementById('memberPhone').value.trim();
+            const pwd = document.getElementById('memberPwd').value.trim();
+            const scope = document.getElementById('memberScope').value.trim();
+            const typeId = +document.getElementById('memberTypeSelect').value;
+            const balance = +document.getElementById('memberBalance').value;
+            const type = memberTypes.find(t => t.id === typeId);
+
+            const newMember = {
+                id: Date.now(),
+                name, phone, pwd, scope,
+                typeId: type.id,
+                typeName: type.name,
+                balance,
+                fruit: type.fruit,
+                snack: type.snack,
+                drink1: type.drink1,
+                drink2: type.drink2,
+                drink3: type.drink3,
+                drink4: type.drink4
+            };
+            members.push(newMember);
+            await saveDataToGist();
+            renderAll();
             this.reset();
             document.getElementById('addMemberModal').classList.add('hidden');
-            showToast('会员添加成功（已同步云端）');
-        }
+        };
 
-        window.delMember = async function (id) {
-            if (!confirm('确定删除？')) return;
-            members = members.filter(m => m.id !== id);
-            await syncMembersToCloud();
-            renderMember();
-            showToast('已删除（已同步云端）');
-        }
-
-        document.getElementById('memberSearch').oninput = function () {
-            let k = this.value.toLowerCase();
-            let res = members.filter(m => m.name.includes(k) || m.phone.includes(k));
-            renderMember(res);
-        }
-
-        document.getElementById('addMemberBtn').onclick = () => document.getElementById('addMemberModal').classList.remove('hidden');
-
-        window.editMember = function (id) {
-            let m = members.find(x => x.id === id);
-            if (!m) return;
-            let r = m.rights;
+        // 打开编辑会员
+        window.openEditMember = function(id) {
+            const m = members.find(x => x.id === id);
+            if(!m) return;
             document.getElementById('editMemberId').value = m.id;
             document.getElementById('editMemberName').value = m.name;
             document.getElementById('editMemberPhone').value = m.phone;
             document.getElementById('editMemberPwd').value = m.pwd || '';
             document.getElementById('editMemberScope').value = m.scope || '';
+            document.getElementById('editMemberTypeSelect').value = m.typeId;
             document.getElementById('editMemberBalance').value = m.balance;
-            document.getElementById('editFruit').value = r.fruit;
-            document.getElementById('editSnack').value = r.snack;
-            document.getElementById('editDrink1').value = r.drink1;
-            document.getElementById('editDrink2').value = r.drink2;
-            document.getElementById('editDrink3').value = r.drink3;
-            document.getElementById('editDrink4').value = r.drink4;
-            let sel = document.getElementById('editMemberTypeSelect');
-            let opt = '<option value="">选择卡种</option>';
-            memberTypes.forEach(t => opt += `<option value="${t.id}">${t.name}</option>`);
-            sel.innerHTML = opt;
-            sel.value = m.typeId;
             document.getElementById('editMemberModal').classList.remove('hidden');
-        }
+        };
 
-        document.getElementById('editMemberForm').onsubmit = async function (e) {
+        // 编辑会员提交
+        document.getElementById('editMemberForm').onsubmit = async function(e) {
             e.preventDefault();
-            let id = +document.getElementById('editMemberId').value;
-            let name = document.getElementById('editMemberName').value.trim();
-            let phone = document.getElementById('editMemberPhone').value.trim();
-            let pwd = document.getElementById('editMemberPwd').value.trim();
-            let scope = document.getElementById('editMemberScope').value.trim();
-            let typeId = +document.getElementById('editMemberTypeSelect').value;
-            let balance = +document.getElementById('editMemberBalance').value;
-            let fruit = +document.getElementById('editFruit').value;
-            let snack = +document.getElementById('editSnack').value;
-            let drink1 = +document.getElementById('editDrink1').value;
-            let drink2 = +document.getElementById('editDrink2').value;
-            let drink3 = +document.getElementById('editDrink3').value;
-            let drink4 = +document.getElementById('editDrink4').value;
-            let type = memberTypes.find(t => t.id === typeId);
-            let idx = members.findIndex(m => m.id === id);
-            members[idx] = {
-                id, name, phone, pwd, scope, typeId, typeName: type.name, balance,
-                rights: { fruit, snack, drink1, drink2, drink3, drink4 }
-            };
-            await syncMembersToCloud();
-            renderMember();
+            const id = +document.getElementById('editMemberId').value;
+            const m = members.find(x => x.id === id);
+            if(!m) return;
+            m.name = document.getElementById('editMemberName').value.trim();
+            m.phone = document.getElementById('editMemberPhone').value.trim();
+            m.pwd = document.getElementById('editMemberPwd').value.trim();
+            m.scope = document.getElementById('editMemberScope').value.trim();
+            m.typeId = +document.getElementById('editMemberTypeSelect').value;
+            m.typeName = memberTypes.find(t=>t.id===m.typeId).name;
+            m.balance = +document.getElementById('editMemberBalance').value;
+
+            await saveDataToGist();
+            renderAll();
             document.getElementById('editMemberModal').classList.add('hidden');
-            showToast('会员修改成功（已同步云端）');
-        }
+        };
 
-        function renderMemberType() {
-            const box = document.getElementById('memberTypeList');
-            let html = '';
-            memberTypes.forEach(t => {
-                html += `<div class="border rounded-lg p-4">
-                <div class="flex justify-between">
-                <div>
-                    <div class="font-bold text-lg">${t.name}</div>
-                    <div class="text-sm text-gray-500">充值:¥${(t.recharge / 10000).toFixed(1)}W</div>
-                    <div class="text-sm text-gray-600 mt-1">果盘×${t.fruit} | 小吃×${t.snack}</div>
-                    <div class="text-sm text-gray-600">基础酒水×${t.drink1} | 中级×${t.drink2} | 高级×${t.drink3} | 顶级×${t.drink4}</div>
-                    <div class="text-xs text-gray-400 mt-1">${t.desc}</div>
-                </div>
-                <button class="btn-outline text-xs h-fit" onclick="editType(${t.id})">编辑</button>
-                </div></div>`;
-            });
-            box.innerHTML = html;
-        }
+        // 删除会员
+        window.delMember = async function(id) {
+            if(!confirm('确定删除该会员？')) return;
+            members = members.filter(m => m.id !== id);
+            await saveDataToGist();
+            renderAll();
+        };
 
-        function fillMemberTypeSelect() {
-            const sel = document.getElementById('memberTypeSelect');
-            let opt = '<option value="">选择卡种</option>';
-            memberTypes.forEach(t => opt += `<option value="${t.id}" data-recharge="${t.recharge}">${t.name}</option>`);
-            sel.innerHTML = opt;
-            sel.onchange = function () {
-                let val = this.selectedOptions[0].dataset.recharge || 0;
-                document.getElementById('memberBalance').value = val;
-            }
-        }
-
-        document.getElementById('addMemberTypeForm').onsubmit = async function (e) {
+        // 新增卡类型
+        document.getElementById('addMemberTypeBtn').onclick = function(){
+            document.getElementById('addTypeModal').classList.remove('hidden');
+        };
+        document.getElementById('addTypeForm').onsubmit = async function(e) {
             e.preventDefault();
-            let name = document.getElementById('memberTypeName').value.trim();
-            let recharge = +document.getElementById('memberTypeRecharge').value;
-            let f = +document.getElementById('typeFruit').value;
-            let s = +document.getElementById('typeSnack').value;
-            let d1 = +document.getElementById('typeDrink1').value;
-            let d2 = +document.getElementById('typeDrink2').value;
-            let d3 = +document.getElementById('typeDrink3').value;
-            let d4 = +document.getElementById('typeDrink4').value;
-            let desc = document.getElementById('memberTypeDesc').value.trim();
-            let editId = this.dataset.editId;
-            if (editId) {
-                let idx = memberTypes.findIndex(t => t.id == editId);
-                memberTypes[idx] = { id: +editId, name, recharge, fruit: f, snack: s, drink1: d1, drink2: d2, drink3: d3, drink4: d4, desc };
-            } else {
-                memberTypes.push({ id: Date.now(), name, recharge, fruit: f, snack: s, drink1: d1, drink2: d2, drink3: d3, drink4: d4, desc });
-            }
-            await syncMemberTypesToCloud();
-            renderMemberType(); fillMemberTypeSelect();
-            this.reset(); delete this.dataset.editId;
-            document.getElementById('addMemberTypeModal').classList.add('hidden');
-            showToast('卡种保存成功（已同步云端）');
-        }
+            const newType = {
+                id: Date.now(),
+                name: document.getElementById('typeName').value.trim(),
+                scope: document.getElementById('typeScope').value.trim(),
+                fruit: +document.getElementById('typeFruit').value,
+                snack: +document.getElementById('typeSnack').value,
+                drink1: +document.getElementById('typeDrink1').value,
+                drink2: +document.getElementById('typeDrink2').value,
+                drink3: +document.getElementById('typeDrink3').value,
+                drink4: +document.getElementById('typeDrink4').value
+            };
+            memberTypes.push(newType);
+            await saveDataToGist();
+            renderAll();
+            this.reset();
+            document.getElementById('addTypeModal').classList.add('hidden');
+        };
 
-        window.editType = function (id) {
-            let t = memberTypes.find(x => x.id === id);
-            let form = document.getElementById('addMemberTypeForm');
-            form.dataset.editId = id;
-            document.getElementById('memberTypeName').value = t.name;
-            document.getElementById('memberTypeRecharge').value = t.recharge;
-            document.getElementById('typeFruit').value = t.fruit;
-            document.getElementById('typeSnack').value = t.snack;
-            document.getElementById('typeDrink1').value = t.drink1;
-            document.getElementById('typeDrink2').value = t.drink2;
-            document.getElementById('typeDrink3').value = t.drink3;
-            document.getElementById('typeDrink4').value = t.drink4;
-            document.getElementById('memberTypeDesc').value = t.desc || '';
-            document.getElementById('addMemberTypeModal').classList.remove('hidden');
-        }
-
-        document.getElementById('addMemberTypeBtn').onclick = () => {
-            let form = document.getElementById('addMemberTypeForm');
-            form.reset(); delete form.dataset.editId;
-            document.getElementById('addMemberTypeModal').classList.remove('hidden');
-        }
-
-        function renderProduct(list = products) {
-            const box = document.getElementById('productList');
-            const empty = document.getElementById('noProducts');
-            if (list.length === 0) { box.innerHTML = ''; empty.classList.remove('hidden'); return; }
-            empty.classList.add('hidden');
-            let html = '';
-            list.forEach(p => {
-                let rt = p.rightType || "普通消费";
-                let st = p.status === 'active' ? "启用" : "停用";
-                let sc = p.status === 'active' ? "badge-success" : "badge-danger";
-                let operateBtn = `<button class="btn-outline py-1 px-3 text-xs" onclick="editProduct(${p.id})">编辑</button>`;
-                if (currentRole === 'boss') {
-                    operateBtn += `<button class="btn-danger py-1 px-3 text-xs ml-2" onclick="delProduct(${p.id})">删除</button>`;
-                }
-                html += `<tr class="border-b hover:bg-gray-50">
-                <td class="py-3 px-4">${p.name}</td>
-                <td class="py-3 px-4">¥${p.price.toFixed(2)}</td>
-                <td class="py-3 px-4">${rt || "普通消费"}</td>
-                <td class="py-3 px-4"><span class="badge ${sc}">${st}</span></td>
-                <td class="py-3 px-4 text-right">${operateBtn}</td>
-                </tr>`;
-            });
-            box.innerHTML = html;
-        }
-
-        window.delProduct = function (id) {
-            if (currentRole !== 'boss') { showToast('仅老板可删除'); return; }
-            if (!confirm('确定删除？')) return;
-            products = products.filter(p => p.id !== id);
-            renderProduct();
-            showToast('删除成功');
-        }
-
-        document.getElementById('addProductForm').onsubmit = function (e) {
+        // 新增消费项目
+        document.getElementById('addProductBtn').onclick = function(){
+            document.getElementById('addProductModal').classList.remove('hidden');
+        };
+        document.getElementById('addProductForm').onsubmit = async function(e) {
             e.preventDefault();
-            let name = document.getElementById('productName').value.trim();
-            let price = +document.getElementById('productPrice').value;
-            let rt = document.getElementById('productRightType').value;
-            products.push({ id: Date.now(), name, price, rightType: rt, status: "active" });
-            renderProduct(); this.reset();
+            const newPro = {
+                id: Date.now(),
+                name: document.getElementById('productName').value.trim(),
+                type: +document.getElementById('productType').value,
+                price: +document.getElementById('productPrice').value
+            };
+            products.push(newPro);
+            await saveDataToGist();
+            renderAll();
+            this.reset();
             document.getElementById('addProductModal').classList.add('hidden');
-            showToast('项目添加成功');
-        }
+        };
 
-        window.editProduct = function (id) {
-            let p = products.find(x => x.id === id);
-            document.getElementById('editProductId').value = p.id;
-            document.getElementById('editProductName').value = p.name;
-            document.getElementById('editProductPrice').value = p.price;
-            document.getElementById('editProductRightType').value = p.rightType || "";
-            document.getElementById('editProductStatus').value = p.status;
-            document.getElementById('editProductModal').classList.remove('hidden');
-        }
+        // 删除消费项目
+        window.delProduct = async function(id) {
+            if(!confirm('确定删除？')) return;
+            products = products.filter(p => p.id !== id);
+            await saveDataToGist();
+            renderAll();
+        };
 
-        document.getElementById('editProductForm').onsubmit = function (e) {
-            e.preventDefault();
-            let id = +document.getElementById('editProductId').value;
-            let name = document.getElementById('editProductName').value.trim();
-            let price = +document.getElementById('editProductPrice').value;
-            let rt = document.getElementById('editProductRightType').value;
-            let st = document.getElementById('editProductStatus').value;
-            let idx = products.findIndex(p => p.id === id);
-            products[idx] = { ...products[idx], name, price, rightType: rt, status: st };
-            renderProduct();
-            document.getElementById('editProductModal').classList.add('hidden');
-            showToast('项目更新成功');
-        }
-
-        document.getElementById('addProductBtn').onclick = () => document.getElementById('addProductModal').classList.remove('hidden');
-        document.getElementById('productSearch').oninput = function () {
-            let k = this.value.toLowerCase();
-            let res = products.filter(p => p.name.includes(k));
-            renderProduct(res);
-        }
-
+        // 消费相关事件
         function bindConsumeEvent() {
-            document.getElementById('addConsumeRow').onclick = addConsumeRow;
-            document.getElementById('submitConsume').onclick = submitConsume;
-            document.querySelector('#consumeItemBox').addEventListener('input', calcTotal);
-            document.querySelector('#consumeItemBox').addEventListener('change', calcTotal);
-            document.querySelector('#consumeItemBox').addEventListener('click', e => {
-                if (e.target.classList.contains('del-row')) {
-                    let rows = document.querySelectorAll('.item-row');
-                    if (rows.length <= 1) { showToast('至少保留一行'); return; }
-                    e.target.closest('.item-row').remove(); calcTotal();
+            const addRowBtn = document.getElementById('addConsumeRow');
+            const box = document.getElementById('consumeItemBox');
+            const memberSel = document.getElementById('consumeMemberSelect');
+
+            // 新增消费行
+            addRowBtn.onclick = function(){
+                const row = box.querySelector('.item-row').cloneNode(true);
+                row.querySelectorAll('input,select').forEach(el=>{
+                    if(el.classList.contains('consume-num')) el.value = 1;
+                    if(el.classList.contains('consume-pay-type')) el.value = 'balance';
+                });
+                row.querySelector('.price-text').innerText = '¥0.00';
+                box.appendChild(row);
+                bindRowEvent(row);
+            };
+
+            // 初始行绑定
+            bindRowEvent(box.querySelector('.item-row'));
+
+            // 切换会员
+            memberSel.onchange = function(){
+                const mid = +this.value;
+                const previewBox = document.getElementById('memberRightsPreview');
+                const rightsBox = document.getElementById('rightsPreviewBox');
+                const balanceShow = document.getElementById('memberBalanceShow');
+                if(!mid){
+                    previewBox.classList.add('hidden');
+                    return;
                 }
-            });
-            document.getElementById('consumeMemberSelect').onchange = function () {
-                let mid = +this.value;
-                let m = members.find(x => x.id === mid);
-                if (m) {
-                    document.getElementById('memberBalanceShow').innerText = `¥${m.balance.toFixed(2)}`;
-                    document.getElementById('memberRightsPreview').classList.remove('hidden');
-                    let r = m.rights;
-                    document.getElementById('rightsPreviewBox').innerHTML = `
-                    <div>果盘: <b>${r.fruit}</b></div>
-                    <div>小吃: <b>${r.snack}</b></div>
-                    <div>基础酒水: <b>${r.drink1}</b></div>
-                    <div>中级酒水: <b>${r.drink2}</b></div>
-                    <div>高级酒水: <b>${r.drink3}</b></div>
-                    <div>顶级酒水: <b>${r.drink4}</b></div>
-                    `;
-                } else {
-                    document.getElementById('memberBalanceShow').innerText = '¥0.00';
-                    document.getElementById('memberRightsPreview').classList.add('hidden');
-                }
-                calcTotal();
-            }
+                const m = members.find(x=>x.id===mid);
+                previewBox.classList.remove('hidden');
+                balanceShow.innerText = `¥${m.balance.toFixed(2)}`;
+                rightsBox.innerHTML = `
+                    <div>果盘：${m.fruit}</div>
+                    <div>小吃：${m.snack}</div>
+                    <div>基础酒水：${m.drink1}</div>
+                    <div>中级酒水：${m.drink2}</div>
+                    <div>高级酒水：${m.drink3}</div>
+                    <div>顶级酒水：${m.drink4}</div>
+                `;
+            };
+
+            // 提交结算
+            document.getElementById('submitConsume').onclick = async function(){
+                const mid = +document.getElementById('consumeMemberSelect').value;
+                if(!mid) return showToast("请先选择会员");
+                const m = members.find(x=>x.id===mid);
+                if(!m) return;
+
+                const rows = box.querySelectorAll('.item-row');
+                let totalPay = 0;
+                let hasError = false;
+
+                rows.forEach(row=>{
+                    const proSel = row.querySelector('.consume-product');
+                    const num = +row.querySelector('.consume-num').value;
+                    const payType = row.querySelector('.consume-pay-type').value;
+                    const pid = +proSel.value;
+                    if(!pid || num <= 0) { hasError = true; return; }
+                    const pro = products.find(p=>p.id===pid);
+                    if(payType === 'balance'){
+                        totalPay += pro.price * num;
+                    }else{
+                        switch(pro.type){
+                            case 0: m.fruit -= num; break;
+                            case 1: m.snack -= num; break;
+                            case 2: m.drink1 -= num; break;
+                            case 3: m.drink2 -= num; break;
+                            case 4: m.drink3 -= num; break;
+                            case 5: m.drink4 -= num; break;
+                        }
+                    }
+                });
+
+                if(hasError) return showToast("请完善消费项目与数量");
+                if(m.balance < totalPay) return showToast("会员余额不足");
+
+                m.balance -= totalPay;
+                await saveDataToGist();
+                renderAll();
+                box.innerHTML = `
+                <div class="flex flex-wrap gap-3 item-row">
+                    <select class="input-field flex-1 min-w-[200px] consume-product">
+                        <option value="">选择项目</option>
+                    </select>
+                    <input type="number" min="1" value="1" class="input-field w-24 consume-num" placeholder="数量">
+                    <select class="input-field w-32 consume-pay-type">
+                        <option value="balance">扣余额(现金)</option>
+                        <option value="rights">扣赠送权益(领取)</option>
+                    </select>
+                    <span class="self-center price-text w-20 text-gray-600">¥0.00</span>
+                    <button type="button" class="btn-danger del-row">删除</button>
+                </div>`;
+                bindRowEvent(box.querySelector('.item-row'));
+                showToast("消费结算完成");
+            };
         }
 
-        function fillConsumeMember() {
-            let sel = document.getElementById('consumeMemberSelect');
-            let opt = '<option value="">选择会员</option>';
-            members.forEach(m => opt += `<option value="${m.id}">${m.name} - ${m.phone}</option>`);
-            sel.innerHTML = opt;
-            document.getElementById('memberBalanceShow').innerText = '¥0.00';
-            document.getElementById('memberRightsPreview').classList.add('hidden');
-        }
+        function bindRowEvent(row) {
+            const proSel = row.querySelector('.consume-product');
+            const numInput = row.querySelector('.consume-num');
+            const priceText = row.querySelector('.price-text');
+            const delBtn = row.querySelector('.del-row');
 
-        function fillConsumeProduct() {
-            let allSel = document.querySelectorAll('.consume-product');
+            // 填充项目下拉
             let opt = '<option value="">选择项目</option>';
-            products.filter(p => p.status === 'active').forEach(p => {
-                opt += `<option value="${p.id}" data-price="${p.price}" data-rt="${p.rightType || ''}">${p.name}</option>`;
+            products.forEach(p=>{
+                opt += `<option value="${p.id}">${p.name} ¥${p.price}</option>`;
             });
-            allSel.forEach(s => s.innerHTML = opt);
-        }
+            proSel.innerHTML = opt;
 
-        function addConsumeRow() {
-            let box = document.getElementById('consumeItemBox');
-            let row = document.createElement('div');
-            row.className = 'flex flex-wrap gap-3 item-row';
-            row.innerHTML = `<select class="input-field flex-1 min-w-[200px] consume-product">
-            <option value="">选择项目</option></select>
-            <input type="number" min="1" value="1" class="input-field w-24 consume-num">
-            <select class="input-field w-32 consume-pay-type">
-            <option value="balance">扣余额(现金)</option>
-            <option value="rights">扣赠送权益(领取)</option>
-            </select>
-            <span class="self-center price-text w-20 text-gray-600">¥0.00</span>
-            <button class="btn-danger del-row">删除</button>`;
-            box.appendChild(row); fillConsumeProduct();
-        }
-
-        function calcTotal() {
-            let balanceTotal = 0;
-            let rows = document.querySelectorAll('.item-row');
-            rows.forEach(row => {
-                let s = row.querySelector('.consume-product');
-                let num = +row.querySelector('.consume-num').value || 0;
-                let price = +s.selectedOptions[0].dataset.price || 0;
-                let pay = row.querySelector('.consume-pay-type').value;
-                let rowTotal = price * num;
-                row.querySelector('.price-text').innerText = `¥${rowTotal.toFixed(2)}`;
-                if (pay === 'balance') balanceTotal += rowTotal;
-            });
-            document.getElementById('deductBalanceMoney').innerText = `¥${balanceTotal.toFixed(2)}`;
-        }
-
-        async function submitConsume() {
-            let mid = +document.getElementById('consumeMemberSelect').value;
-            if (!mid) { showToast('请先选择会员'); return; }
-            let member = members.find(m => m.id === mid);
-            if (!member) return;
-            let rows = document.querySelectorAll('.item-row');
-            let deductBalance = 0;
-            let deductR = { fruit: 0, snack: 0, drink1: 0, drink2: 0, drink3: 0, drink4: 0 };
-            let pass = true;
-
-            rows.forEach(row => {
-                let pid = +row.querySelector('.consume-product').value;
-                if (!pid) return;
-                let num = +row.querySelector('.consume-num').value || 0;
-                let pay = row.querySelector('.consume-pay-type').value;
-                let p = products.find(x => x.id === pid);
-                if (!p) return;
-                if (pay === 'rights') {
-                    if (!p.rightType) { showToast('该项目不可用权益'); pass = false; return; }
-                    if (p.rightType === 'fruit') deductR.fruit += num;
-                    if (p.rightType === 'snack') deductR.snack += num;
-                    if (p.rightType === 'drink1') deductR.drink1 += num;
-                    if (p.rightType === 'drink2') deductR.drink2 += num;
-                    if (p.rightType === 'drink3') deductR.drink3 += num;
-                    if (p.rightType === 'drink4') deductR.drink4 += num;
-                } else {
-                    deductBalance += p.price * num;
+            function calcPrice(){
+                const pid = +proSel.value;
+                const num = +numInput.value || 0;
+                const p = products.find(x=>x.id===pid);
+                if(p){
+                    priceText.innerText = `¥${(p.price * num).toFixed(2)}`;
+                }else{
+                    priceText.innerText = '¥0.00';
                 }
-            });
-            if (!pass) return;
-
-            let r = member.rights;
-            if (r.fruit !== 999 && r.fruit < deductR.fruit) { showToast('果盘不足'); return; }
-            if (r.snack !== 999 && r.snack < deductR.snack) { showToast('小吃不足'); return; }
-            if (r.drink1 < deductR.drink1) { showToast('基础酒水不足'); return; }
-            if (r.drink2 < deductR.drink2) { showToast('中级酒水不足'); return; }
-            if (r.drink3 < deductR.drink3) { showToast('高级酒水不足'); return; }
-            if (r.drink4 < deductR.drink4) { showToast('顶级酒水不足'); return; }
-            if (member.balance < deductBalance) { showToast('余额不足'); return; }
-
-            member.balance -= deductBalance;
-            if (r.fruit !== 999) r.fruit -= deductR.fruit;
-            if (r.snack !== 999) r.snack -= deductR.snack;
-            r.drink1 -= deductR.drink1;
-            r.drink2 -= deductR.drink2;
-            r.drink3 -= deductR.drink3;
-            r.drink4 -= deductR.drink4;
-
-            await syncMembersToCloud();
-            renderMember(); fillConsumeMember();
-            document.getElementById('memberBalanceShow').innerText = `¥${member.balance.toFixed(2)}`;
-            showToast('结算成功（已同步云端）');
+            }
+            proSel.onchange = calcPrice;
+            numInput.oninput = calcPrice;
+            delBtn.onclick = function(){
+                const allRows = document.querySelectorAll('.item-row');
+                if(allRows.length <= 1) return;
+                row.remove();
+            };
         }
 
-        async function syncMembersToCloud() {
-            // 这里自动同步会员到腾讯文档
-            showToast("数据同步中...");
-        }
-
-        async function syncMemberTypesToCloud() {
-            showToast("卡类型同步中...");
-        }
-
+        // 消息提示
         function showToast(msg) {
             toast.innerText = msg;
             toast.classList.remove('translate-x-full');
             setTimeout(() => toast.classList.add('translate-x-full'), 2500);
         }
+
+        // 页面搜索
+        document.getElementById('memberSearch').oninput = function(){
+            const key = this.value.trim().toLowerCase();
+            const filter = members.filter(m=>
+                m.name.toLowerCase().includes(key) || m.phone.includes(key)
+            );
+            renderMember(filter);
+        };
+        document.getElementById('productSearch').oninput = function(){
+            const key = this.value.trim().toLowerCase();
+            const filter = products.filter(p=>
+                p.name.toLowerCase().includes(key)
+            );
+            const box = document.getElementById('productList');
+            const empty = document.getElementById('noProducts');
+            if(filter.length === 0){
+                box.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            const typeMap = ['果盘','小吃','基础酒水','中级酒水','高级酒水','顶级酒水'];
+            let html = '';
+            filter.forEach(p => {
+                html += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">${p.name}</td>
+                    <td class="py-3 px-4">¥${Number(p.price).toFixed(2)}</td>
+                    <td class="py-3 px-4">${typeMap[p.type]}</td>
+                    <td class="py-3 px-4"><span class="badge badge-success">正常</span></td>
+                    <td class="py-3 px-4 text-right">
+                        <button class="btn-danger py-1 px-3 text-xs" onclick="delProduct(${p.id})">删除</button>
+                    </td>
+                </tr>`;
+            });
+            box.innerHTML = html;
+        };
     </script>
 </body>
 </html>
