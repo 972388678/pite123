@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员卡管理系统-权限版（修复果盘小吃扣减）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF',
+                        secondary: '#F97316',
+                        neutral: '#F3F4F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .btn-primary { @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all flex items-center gap-2; }
+            .btn-secondary { @apply bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition-all flex items-center gap-2; }
+            .btn-outline { @apply border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary/10 transition-all flex items-center gap-2; }
+            .btn-danger { @apply border border-red-500 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition-all flex items-center gap-2; }
+            .input-field { @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50; }
+            .tab-active { @apply border-b-2 border-primary text-primary; }
+            .badge { @apply px-2 py-1 text-xs rounded-full font-medium; }
+            .badge-success { @apply bg-green-100 text-green-800; }
+            .badge-danger { @apply bg-red-100 text-red-800; }
+            .badge-blue { @apply bg-blue-100 text-blue-800; }
+            .disabled-btn { @apply bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-lg flex items-center gap-2; }
+            .disabled-tab { @apply flex-1 py-4 text-center font-medium text-gray-400 cursor-not-allowed; }
+        }
+    </style>
+</head>
+<body class="bg-neutral min-h-screen">
+    <!-- 登录页面 -->
+    <div id="loginPage" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
+            <div class="text-center mb-6">
+                <i class="fa fa-credit-card text-primary text-4xl mb-3"></i>
+                <h1 class="text-2xl font-bold text-gray-800">会员卡管理系统</h1>
+                <p class="text-gray-500 mt-1">请输入登录密码</p>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">登录密码</label>
+                    <input type="password" id="loginPwd" class="input-field" placeholder="输入密码后登录" required>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3">
+                    <i class="fa fa-sign-in"></i> 登录系统
+                </button>
+
+            </form>
+            <div id="loginError" class="mt-4 text-red-500 text-sm text-center hidden">密码错误，请重新输入</div>
+        </div>
+    </div>
+
+    <!-- 主系统页面（默认隐藏） -->
+    <div id="mainSystem" class="hidden">
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-credit-card text-primary text-2xl"></i>
+                    <h1 class="text-xl font-bold text-gray-800">会员卡管理系统</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="userRole" class="text-sm text-gray-600"></span>
+                    <button id="logoutBtn" class="btn-outline py-1 px-3 text-sm">
+                        <i class="fa fa-sign-out"></i> 退出登录
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-6">
+            <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                <div class="flex border-b flex-wrap">
+                    <button id="tabMembers" class="tab-btn tab-active flex-1 py-4 text-center font-medium" data-tab="members">
+                        <i class="fa fa-users mr-2"></i>会员管理
+                    </button>
+                    <button id="tabConsume" class="tab-btn flex-1 py-4 text-center font-medium text-gray-600 hover:text-primary" data-tab="consume">
+                        <i class="fa fa-shopping-cart mr-2"></i>会员扣卡消费
+                    </button>
+                    <button id="tabMemberTypes" class="tab-btn flex-1 py-4 text-center font-medium text-gray-600 hover:text-primary" data-tab="memberTypes">
+                        <i class="fa fa-id-card-o mr-2"></i>会员卡类型
+                    </button>
+                    <button id="tabProducts" class="tab-btn flex-1 py-4 text-center font-medium text-gray-600 hover:text-primary" data-tab="products">
+                        <i class="fa fa-list-alt mr-2"></i>消费项目
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1.会员管理 -->
+            <div id="members" class="tab-content">
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">会员管理</h2>
+                        <div class="flex gap-3">
+                            <input type="text" id="memberSearch" placeholder="搜索姓名/手机号" class="input-field w-48">
+                            <button id="addMemberBtn" class="btn-primary">
+                                <i class="fa fa-plus"></i>添加会员
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[800px]">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">会员信息</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">卡类型</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">账户余额</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">果盘</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">小吃</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">基础酒水</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">中级酒水</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">高级酒水</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">顶级酒水</th>
+                                    <th class="py-3 px-4 text-right text-sm text-gray-500">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memberList"></tbody>
+                        </table>
+                    </div>
+                    <div id="noMembers" class="text-center py-12 hidden">
+                        <i class="fa fa-users text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500">暂无会员</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.会员扣卡消费（核心领取/抵扣页面） -->
+            <div id="consume" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">会员领取/消费结算</h2>
+
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">选择会员</label>
+                        <select id="consumeMemberSelect" class="input-field">
+                            <option value="">请选择会员</option>
+                        </select>
+                    </div>
+
+                    <!-- 会员剩余权益展示 -->
+                    <div id="memberRightsPreview" class="mb-5 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">会员剩余赠送权益</label>
+                        <div class="grid grid-cols-3 md:grid-cols-6 gap-3 p-4 bg-gray-50 rounded-lg" id="rightsPreviewBox"></div>
+                        <p class="text-red-500 text-sm mt-2">⚠️ 领取赠送品类，请选择【扣赠送权益】；正常消费选择【扣余额】</p>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">消费/领取明细</label>
+                        <div id="consumeItemBox" class="border rounded-lg p-4 space-y-3">
+                            <div class="flex flex-wrap gap-3 item-row">
+                                <select class="input-field flex-1 min-w-[200px] consume-product">
+                                    <option value="">选择项目</option>
+                                </select>
+                                <input type="number" min="1" value="1" class="input-field w-24 consume-num" placeholder="数量">
+                                <select class="input-field w-32 consume-pay-type">
+                                    <option value="balance">扣余额(现金)</option>
+                                    <option value="rights">扣赠送权益(领取)</option>
+                                </select>
+                                <span class="self-center price-text w-20 text-gray-600">¥0.00</span>
+                                <button type="button" class="btn-danger del-row">删除</button>
+                            </div>
+                        </div>
+                        <button id="addConsumeRow" class="btn-outline mt-3 text-sm">
+                            <i class="fa fa-plus"></i> 新增一行
+                        </button>
+                    </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <div class="flex justify-between text-lg mb-2">
+                            <span>本次现金消费：</span>
+                            <span id="deductBalanceMoney" class="text-red-600 font-bold">¥0.00</span>
+                        </div>
+                        <div class="flex justify-between text-lg mb-4">
+                            <span>会员账户余额：</span>
+                            <span id="memberBalanceShow" class="text-primary font-bold">¥0.00</span>
+                        </div>
+                        <button id="submitConsume" class="btn-secondary w-full py-3 text-lg">
+                            <i class="fa fa-check"></i> 确认结算
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3.会员卡类型设置 -->
+            <div id="memberTypes" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">会员卡类型 & 赠送权益配置</h2>
+                        <button id="addMemberTypeBtn" class="btn-primary">
+                            <i class="fa fa-plus"></i>新增卡类型
+                        </button>
+                    </div>
+                    <div id="memberTypeList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- 4.消费项目管理 -->
+            <div id="products" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">消费项目管理</h2>
+                        <div class="flex gap-3">
+                            <input type="text" id="productSearch" placeholder="搜索项目" class="input-field w-48">
+                            <button id="addProductBtn" class="btn-primary">
+                                <i class="fa fa-plus"></i>新增项目
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[600px]">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">项目名称</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">单价</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">权益类型</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">状态</th>
+                                    <th class="py-3 px-4 text-right text-sm text-gray-500">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productList"></tbody>
+                        </table>
+                    </div>
+                    <div id="noProducts" class="text-center py-12 hidden">
+                        <i class="fa fa-shopping-cart text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500">暂无项目</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 弹窗 -->
+        <!-- 添加会员 -->
+        <div id="addMemberModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">添加会员</h3>
+                <form id="addMemberForm">
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">姓名</label>
+                        <input type="text" id="memberName" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">手机号</label>
+                        <input type="tel" id="memberPhone" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">会员卡类型</label>
+                        <select id="memberTypeSelect" class="input-field" required></select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm mb-1">充值金额</label>
+                        <input type="number" id="memberBalance" class="input-field" min="0" required>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="close-modal btn-outline">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 编辑会员 -->
+        <div id="editMemberModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">编辑会员信息</h3>
+                <form id="editMemberForm">
+                    <input type="hidden" id="editMemberId">
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">姓名</label>
+                        <input type="text" id="editMemberName" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">手机号</label>
+                        <input type="tel" id="editMemberPhone" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">会员卡类型</label>
+                        <select id="editMemberTypeSelect" class="input-field" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">账户余额</label>
+                        <input type="number" id="editMemberBalance" class="input-field" min="0" required>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div><label class="block text-sm mb-1">果盘</label><input type="number" id="editFruit" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">小吃</label><input type="number" id="editSnack" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">基础酒水</label><input type="number" id="editDrink1" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">中级酒水</label><input type="number" id="editDrink2" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">高级酒水</label><input type="number" id="editDrink3" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">顶级酒水</label><input type="number" id="editDrink4" class="input-field" min="0"></div>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="close-modal btn-outline">取消</button>
+                        <button type="submit" class="btn-primary">保存修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="addMemberTypeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">编辑会员卡权益</h3>
+                <form id="addMemberTypeForm">
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">卡种名称</label>
+                        <input type="text" id="memberTypeName" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">充值金额(元)</label>
+                        <input type="number" id="memberTypeRecharge" class="input-field" required>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div><label class="block text-sm mb-1">果盘</label><input type="number" id="typeFruit" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">小吃</label><input type="number" id="typeSnack" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">基础酒水</label><input type="number" id="typeDrink1" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">中级酒水</label><input type="number" id="typeDrink2" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">高级酒水</label><input type="number" id="typeDrink3" class="input-field" min="0"></div>
+                        <div><label class="block text-sm mb-1">顶级酒水</label><input type="number" id="typeDrink4" class="input-field" min="0"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm mb-1">备注</label>
+                        <textarea id="memberTypeDesc" class="input-field" rows="2"></textarea>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="close-modal btn-outline">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="addProductModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">新增消费项目</h3>
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">项目名称</label>
+                        <input type="text" id="productName" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">单价</label>
+                        <input type="number" id="productPrice" class="input-field" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm mb-1">对应权益类型</label>
+                        <select id="productRightType" class="input-field">
+                            <option value="">非赠送项目（仅扣余额）</option>
+                            <option value="fruit">精品果盘</option>
+                            <option value="snack">小吃套餐</option>
+                            <option value="drink1">基础酒水套餐</option>
+                            <option value="drink2">中级酒水套餐</option>
+                            <option value="drink3">高级酒水套餐</option>
+                            <option value="drink4">顶级酒水套餐</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="close-modal btn-outline">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="editProductModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5">
+                <h3 class="text-lg font-bold mb-4">编辑项目</h3>
+                <form id="editProductForm">
+                    <input type="hidden" id="editProductId">
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">项目名称</label>
+                        <input type="text" id="editProductName" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">单价</label>
+                        <input type="number" id="editProductPrice" class="input-field" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">对应权益类型</label>
+                        <select id="editProductRightType" class="input-field">
+                            <option value="">非赠送项目（仅扣余额）</option>
+                            <option value="fruit">精品果盘</option>
+                            <option value="snack">小吃套餐</option>
+                            <option value="drink1">基础酒水套餐</option>
+                            <option value="drink2">中级酒水套餐</option>
+                            <option value="drink3">高级酒水套餐</option>
+                            <option value="drink4">顶级酒水套餐</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm mb-1">状态</label>
+                        <select id="editProductStatus" class="input-field">
+                            <option value="active">启用</option>
+                            <option value="inactive">停用</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="close-modal btn-outline">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-transform translate-x-full z-50"></div>
+    </div>
+
+    <script>
+        // 全局变量：当前登录角色（boss/employee）
+        let currentRole = '';
+        let members = JSON.parse(localStorage.getItem('members')) || [];
+        let memberTypes = JSON.parse(localStorage.getItem('memberTypes')) || [
+            {id:1,name:"铜卡",recharge:36000,fruit:3,snack:0,drink1:1,drink2:0,drink3:0,drink4:0,desc:"充值3.6W，赠送果盘×3、基础酒水×1"},
+            {id:2,name:"银卡",recharge:66000,fruit:6,snack:6,drink1:2,drink2:0,drink3:0,drink4:0,desc:"充值6.6W，赠送果盘×6、小吃×6、基础酒水×2"},
+            {id:3,name:"金卡",recharge:166000,fruit:16,snack:16,drink1:2,drink2:0,drink3:0,drink4:0,desc:"充值16.6W，赠送果盘×16、小吃×16、基础酒水×2"},
+            {id:4,name:"钻卡",recharge:266000,fruit:26,snack:26,drink1:0,drink2:5,drink3:0,drink4:0,desc:"充值26.6W，赠送果盘×26、小吃×26、中级酒水×5"},
+            {id:5,name:"至尊黑卡",recharge:666000,fruit:999,snack:999,drink1:0,drink2:0,drink3:10,drink4:0,desc:"充值66.6W，果盘/小吃不限量，高级酒水×10"}
+        ];
+        let products = JSON.parse(localStorage.getItem('products')) || [
+            {id:1,name:"精品果盘",price:0,rightType:"fruit",status:"active"},
+            {id:2,name:"小吃套餐",price:0,rightType:"snack",status:"active"},
+            {id:3,name:"基础酒水套餐",price:0,rightType:"drink1",status:"active"},
+            {id:4,name:"中级酒水套餐",price:0,rightType:"drink2",status:"active"},
+            {id:5,name:"高级酒水套餐",price:0,rightType:"drink3",status:"active"},
+            {id:6,name:"顶级酒水套餐",price:0,rightType:"drink4",status:"active"},
+            {id:7,name:"其他消费",price:100,rightType:"",status:"active"}
+        ];
+
+        const toast = document.getElementById('toast');
+        document.addEventListener('DOMContentLoaded',function(){
+            // 初始化登录逻辑
+            initLogin();
+            // 初始化本地存储
+            if(!localStorage.getItem('memberTypes')) localStorage.setItem('memberTypes',JSON.stringify(memberTypes));
+            if(!localStorage.getItem('products')) localStorage.setItem('products',JSON.stringify(products));
+        });
+
+        // ========== 登录逻辑 ==========
+        function initLogin() {
+            // 登录表单提交
+            document.getElementById('loginForm').onsubmit = function(e) {
+                e.preventDefault();
+                const pwd = document.getElementById('loginPwd').value;
+                const errorBox = document.getElementById('loginError');
+                
+                if (pwd === '8800') {
+                    // 老板登录
+                    currentRole = 'boss';
+                    document.getElementById('userRole').textContent = '当前身份：老板（全权限）';
+                    errorBox.classList.add('hidden');
+                    showSystem();
+                } else if (pwd === '1100') {
+                    // 员工登录
+                    currentRole = 'employee';
+                    document.getElementById('userRole').textContent = '当前身份：员工（仅扣费）';
+                    errorBox.classList.add('hidden');
+                    showSystem();
+                    // 员工权限限制
+                    limitEmployeePermission();
+                } else {
+                    // 密码错误
+                    errorBox.classList.remove('hidden');
+                    document.getElementById('loginPwd').value = '';
+                }
+            };
+
+            // 退出登录
+            document.getElementById('logoutBtn').onclick = function() {
+                currentRole = '';
+                document.getElementById('loginPage').classList.remove('hidden');
+                document.getElementById('mainSystem').classList.add('hidden');
+                document.getElementById('loginPwd').value = '';
+            };
+        }
+
+        // 显示系统页面
+        function showSystem() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainSystem').classList.remove('hidden');
+            // 初始化系统功能
+            initTab();
+            initModal();
+            renderAll();
+            bindConsumeEvent();
+        }
+
+        // 员工权限限制（核心）
+        function limitEmployeePermission() {
+            // 1. 禁用非消费相关标签
+            document.getElementById('tabMemberTypes').classList.remove('tab-btn');
+            document.getElementById('tabMemberTypes').classList.add('disabled-tab');
+            document.getElementById('tabProducts').classList.remove('tab-btn');
+            document.getElementById('tabProducts').classList.add('disabled-tab');
+            
+            // 2. 禁用会员管理的添加按钮
+            document.getElementById('addMemberBtn').classList.remove('btn-primary');
+            document.getElementById('addMemberBtn').classList.add('disabled-btn');
+            document.getElementById('addMemberBtn').disabled = true;
+            
+            // 3. 默认切换到消费页面
+            document.getElementById('tabConsume').click();
+            
+            // 4. 渲染会员列表时隐藏编辑/删除按钮
+            renderMember(members);
+        }
+
+        // ========== 原有功能逻辑 ==========
+        // 标签切换
+        function initTab(){
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            tabs.forEach(btn=>{
+                btn.onclick = function(){
+                    let t = this.dataset.tab;
+                    tabs.forEach(b=>{b.classList.remove('tab-active');b.classList.add('text-gray-600');});
+                    this.classList.add('tab-active');this.classList.remove('text-gray-600');
+                    contents.forEach(c=>c.classList.add('hidden'));
+                    document.getElementById(t).classList.remove('hidden');
+                    if(t==='consume'){fillConsumeMember();fillConsumeProduct();calcTotal();}
+                }
+            })
+        }
+
+        // 关闭弹窗
+        function initModal(){
+            document.querySelectorAll('.close-modal').forEach(btn=>{
+                btn.onclick = ()=>{document.querySelectorAll('.fixed.inset-0').forEach(m=>m.classList.add('hidden'));}
+            })
+        }
+
+        function renderAll(){
+            renderMemberType();
+            fillMemberTypeSelect();
+            renderMember();
+            renderProduct();
+        }
+
+        // ========== 会员管理 ==========
+        function renderMember(list=members){
+            const box = document.getElementById('memberList');
+            const empty = document.getElementById('noMembers');
+            if(list.length===0){box.innerHTML='';empty.classList.remove('hidden');return;}
+            empty.classList.add('hidden');
+            let html = '';
+            list.forEach(m=>{
+                let r = m.rights || {fruit:0,snack:0,drink1:0,drink2:0,drink3:0,drink4:0};
+                // 员工看不到编辑/删除按钮
+                let operateBtn = '';
+                if (currentRole === 'boss') {
+                    operateBtn = `<button class="btn-outline py-1 px-3 text-xs" onclick="editMember(${m.id})">编辑</button>
+                    <button class="btn-danger py-1 px-3 text-xs" onclick="delMember(${m.id})">删除</button>`;
+                }
+                
+                html += `<tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">${m.name}<br><span class="text-xs text-gray-500">${m.phone}</span></td>
+                <td class="py-3 px-4"><span class="badge badge-blue">${m.typeName}</span></td>
+                <td class="py-3 px-4 font-medium">¥${m.balance.toFixed(2)}</td>
+                <td class="py-3 px-4">${r.fruit}</td>
+                <td class="py-3 px-4">${r.snack}</td>
+                <td class="py-3 px-4">${r.drink1}</td>
+                <td class="py-3 px-4">${r.drink2}</td>
+                <td class="py-3 px-4">${r.drink3}</td>
+                <td class="py-3 px-4">${r.drink4}</td>
+                <td class="py-3 px-4 text-right">${operateBtn}</td>
+                </tr>`;
+            });
+            box.innerHTML = html;
+        }
+
+        // 添加会员
+        document.getElementById('addMemberForm').onsubmit = function(e){
+            e.preventDefault();
+            let name = document.getElementById('memberName').value.trim();
+            let phone = document.getElementById('memberPhone').value.trim();
+            let typeId = +document.getElementById('memberTypeSelect').value;
+            let balance = +document.getElementById('memberBalance').value;
+            let type = memberTypes.find(t=>t.id===typeId);
+            members.push({
+                id:Date.now(),name,phone,typeId,typeName:type.name,balance,
+                rights:{fruit:type.fruit,snack:type.snack,drink1:type.drink1,drink2:type.drink2,drink3:type.drink3,drink4:type.drink4}
+            });
+            localStorage.setItem('members',JSON.stringify(members));
+            renderMember();this.reset();
+            document.getElementById('addMemberModal').classList.add('hidden');
+            showToast('会员添加成功，已自动配置赠送权益');
+        }
+
+        // 删除会员
+        window.delMember = function(id){
+            if(!confirm('确定删除？'))return;
+            members = members.filter(m=>m.id!==id);
+            localStorage.setItem('members',JSON.stringify(members));
+            renderMember();showToast('已删除');
+        }
+
+        // 搜索会员
+        document.getElementById('memberSearch').oninput = function(){
+            let k = this.value.toLowerCase();
+            let res = members.filter(m=>m.name.includes(k)||m.phone.includes(k));
+            renderMember(res);
+        }
+
+        // 打开添加会员弹窗
+        document.getElementById('addMemberBtn').onclick = ()=>document.getElementById('addMemberModal').classList.remove('hidden');
+
+        // 编辑会员
+        window.editMember = function(id){
+            let m = members.find(x=>x.id===id);
+            if(!m)return;
+            let r = m.rights;
+            document.getElementById('editMemberId').value = m.id;
+            document.getElementById('editMemberName').value = m.name;
+            document.getElementById('editMemberPhone').value = m.phone;
+            document.getElementById('editMemberBalance').value = m.balance;
+            document.getElementById('editFruit').value = r.fruit;
+            document.getElementById('editSnack').value = r.snack;
+            document.getElementById('editDrink1').value = r.drink1;
+            document.getElementById('editDrink2').value = r.drink2;
+            document.getElementById('editDrink3').value = r.drink3;
+            document.getElementById('editDrink4').value = r.drink4;
+            
+            let sel = document.getElementById('editMemberTypeSelect');
+            let opt = '<option value="">选择卡种</option>';
+            memberTypes.forEach(t=>opt += `<option value="${t.id}">${t.name}</option>`);
+            sel.innerHTML = opt;
+            sel.value = m.typeId;
+            
+            document.getElementById('editMemberModal').classList.remove('hidden');
+        }
+
+        // 提交编辑会员
+        document.getElementById('editMemberForm').onsubmit = function(e){
+            e.preventDefault();
+            let id = +document.getElementById('editMemberId').value;
+            let name = document.getElementById('editMemberName').value.trim();
+            let phone = document.getElementById('editMemberPhone').value.trim();
+            let typeId = +document.getElementById('editMemberTypeSelect').value;
+            let balance = +document.getElementById('editMemberBalance').value;
+            let fruit = +document.getElementById('editFruit').value;
+            let snack = +document.getElementById('editSnack').value;
+            let drink1 = +document.getElementById('editDrink1').value;
+            let drink2 = +document.getElementById('editDrink2').value;
+            let drink3 = +document.getElementById('editDrink3').value;
+            let drink4 = +document.getElementById('editDrink4').value;
+            let type = memberTypes.find(t=>t.id===typeId);
+
+            let idx = members.findIndex(m=>m.id===id);
+            members[idx] = {
+                id,name,phone,typeId,typeName:type.name,balance,
+                rights:{fruit,snack,drink1,drink2,drink3,drink4}
+            };
+            localStorage.setItem('members',JSON.stringify(members));
+            renderMember();
+            document.getElementById('editMemberModal').classList.add('hidden');
+            showToast('会员信息修改成功');
+        }
+
+        // ========== 会员卡类型 ==========
+        function renderMemberType(){
+            const box = document.getElementById('memberTypeList');
+            let html = '';
+            memberTypes.forEach(t=>{
+                html += `<div class="border rounded-lg p-4">
+                <div class="flex justify-between">
+                <div>
+                    <div class="font-bold text-lg">${t.name}</div>
+                    <div class="text-sm text-gray-500">充值:¥${(t.recharge/10000).toFixed(1)}W</div>
+                    <div class="text-sm text-gray-600 mt-1">果盘×${t.fruit} | 小吃×${t.snack}</div>
+                    <div class="text-sm text-gray-600">基础酒水×${t.drink1} | 中级×${t.drink2} | 高级×${t.drink3} | 顶级×${t.drink4}</div>
+                    <div class="text-xs text-gray-400 mt-1">${t.desc}</div>
+                </div>
+                <button class="btn-outline text-xs h-fit" onclick="editType(${t.id})">编辑</button>
+                </div></div>`;
+            });
+            box.innerHTML = html;
+        }
+
+        function fillMemberTypeSelect(){
+            const sel = document.getElementById('memberTypeSelect');
+            let opt = '<option value="">选择卡种</option>';
+            memberTypes.forEach(t=>opt += `<option value="${t.id}" data-recharge="${t.recharge}">${t.name}</option>`);
+            sel.innerHTML = opt;
+            sel.onchange = function(){
+                let val = this.selectedOptions[0].dataset.recharge||0;
+                document.getElementById('memberBalance').value = val;
+            }
+        }
+
+        document.getElementById('addMemberTypeForm').onsubmit = function(e){
+            e.preventDefault();
+            let name = document.getElementById('memberTypeName').value.trim();
+            let recharge = +document.getElementById('memberTypeRecharge').value;
+            let f = +document.getElementById('typeFruit').value;
+            let s = +document.getElementById('typeSnack').value;
+            let d1 = +document.getElementById('typeDrink1').value;
+            let d2 = +document.getElementById('typeDrink2').value;
+            let d3 = +document.getElementById('typeDrink3').value;
+            let d4 = +document.getElementById('typeDrink4').value;
+            let desc = document.getElementById('memberTypeDesc').value.trim();
+            let editId = this.dataset.editId;
+            
+            if(editId){
+                let idx = memberTypes.findIndex(t=>t.id==editId);
+                memberTypes[idx] = {id:+editId,name,recharge,fruit:f,snack:s,drink1:d1,drink2:d2,drink3:d3,drink4:d4,desc};
+            }else{
+                memberTypes.push({id:Date.now(),name,recharge,fruit:f,snack:s,drink1:d1,drink2:d2,drink3:d3,drink4:d4,desc});
+            }
+            
+            localStorage.setItem('memberTypes',JSON.stringify(memberTypes));
+            renderMemberType();fillMemberTypeSelect();
+            this.reset();delete this.dataset.editId;
+            document.getElementById('addMemberTypeModal').classList.add('hidden');
+            showToast('卡种配置已保存');
+        }
+
+        window.editType = function(id){
+            let t = memberTypes.find(x=>x.id===id);
+            let form = document.getElementById('addMemberTypeForm');
+            form.dataset.editId = id;
+            document.getElementById('memberTypeName').value = t.name;
+            document.getElementById('memberTypeRecharge').value = t.recharge;
+            document.getElementById('typeFruit').value = t.fruit;
+            document.getElementById('typeSnack').value = t.snack;
+            document.getElementById('typeDrink1').value = t.drink1;
+            document.getElementById('typeDrink2').value = t.drink2;
+            document.getElementById('typeDrink3').value = t.drink3;
+            document.getElementById('typeDrink4').value = t.drink4;
+            document.getElementById('memberTypeDesc').value = t.desc||'';
+            document.getElementById('addMemberTypeModal').classList.remove('hidden');
+        }
+
+        document.getElementById('addMemberTypeBtn').onclick = ()=>{
+            let form = document.getElementById('addMemberTypeForm');
+            form.reset();delete form.dataset.editId;
+            document.getElementById('addMemberTypeModal').classList.remove('hidden');
+        }
+
+        // ========== 消费项目 ==========
+        function renderProduct(list=products){
+            const box = document.getElementById('productList');
+            const empty = document.getElementById('noProducts');
+            if(list.length===0){box.innerHTML='';empty.classList.remove('hidden');return;}
+            empty.classList.add('hidden');
+            let html = '';
+            list.forEach(p=>{
+                let rt = p.rightType||"普通消费";
+                let st = p.status==='active'?"启用":"停用";
+                let sc = p.status==='active'?"badge-success":"badge-danger";
+                html += `<tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">${p.name}</td>
+                <td class="py-3 px-4">¥${p.price.toFixed(2)}</td>
+                <td class="py-3 px-4">${rt||"普通消费"}</td>
+                <td class="py-3 px-4"><span class="badge ${sc}">${st}</span></td>
+                <td class="py-3 px-4 text-right"><button class="btn-outline py-1 px-3 text-xs" onclick="editProduct(${p.id})">编辑</button></td>
+                </tr>`;
+            });
+            box.innerHTML = html;
+        }
+
+        document.getElementById('addProductForm').onsubmit = function(e){
+            e.preventDefault();
+            let name = document.getElementById('productName').value.trim();
+            let price = +document.getElementById('productPrice').value;
+            let rt = document.getElementById('productRightType').value;
+            products.push({id:Date.now(),name,price,rightType:rt,status:"active"});
+            localStorage.setItem('products',JSON.stringify(products));
+            renderProduct();this.reset();
+            document.getElementById('addProductModal').classList.add('hidden');
+            showToast('项目添加成功');
+        }
+
+        window.editProduct = function(id){
+            let p = products.find(x=>x.id===id);
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('editProductName').value = p.name;
+            document.getElementById('editProductPrice').value = p.price;
+            document.getElementById('editProductRightType').value = p.rightType||"";
+            document.getElementById('editProductStatus').value = p.status;
+            document.getElementById('editProductModal').classList.remove('hidden');
+        }
+
+        document.getElementById('editProductForm').onsubmit = function(e){
+            e.preventDefault();
+            let id = +document.getElementById('editProductId').value;
+            let name = document.getElementById('editProductName').value.trim();
+            let price = +document.getElementById('editProductPrice').value;
+            let rt = document.getElementById('editProductRightType').value;
+            let st = document.getElementById('editProductStatus').value;
+            let idx = products.findIndex(p=>p.id===id);
+            products[idx] = {...products[idx],name,price,rightType:rt,status:st};
+            localStorage.setItem('products',JSON.stringify(products));
+            renderProduct();
+            document.getElementById('editProductModal').classList.add('hidden');
+            showToast('项目已更新');
+        }
+
+        document.getElementById('addProductBtn').onclick = ()=>document.getElementById('addProductModal').classList.remove('hidden');
+        document.getElementById('productSearch').oninput = function(){
+            let k = this.value.toLowerCase();
+            let res = products.filter(p=>p.name.includes(k));
+            renderProduct(res);
+        }
+
+        // ========== 消费&权益抵扣 核心逻辑（修复果盘小吃扣减） ==========
+        function bindConsumeEvent(){
+            document.getElementById('addConsumeRow').onclick = addConsumeRow;
+            document.getElementById('submitConsume').onclick = submitConsume;
+            document.querySelector('#consumeItemBox').addEventListener('input',calcTotal);
+            document.querySelector('#consumeItemBox').addEventListener('change',calcTotal);
+            document.querySelector('#consumeItemBox').addEventListener('click',e=>{
+                if(e.target.classList.contains('del-row')){
+                    let rows = document.querySelectorAll('.item-row');
+                    if(rows.length<=1){showToast('至少保留一行');return;}
+                    e.target.closest('.item-row').remove();calcTotal();
+                }
+            });
+            document.getElementById('consumeMemberSelect').onchange = function(){
+                let mid = +this.value;
+                let m = members.find(x=>x.id===mid);
+                if(m){
+                    document.getElementById('memberBalanceShow').innerText = `¥${m.balance.toFixed(2)}`;
+                    document.getElementById('memberRightsPreview').classList.remove('hidden');
+                    let r = m.rights;
+                    document.getElementById('rightsPreviewBox').innerHTML = `
+                    <div>果盘: <b>${r.fruit}</b></div>
+                    <div>小吃: <b>${r.snack}</b></div>
+                    <div>基础酒水: <b>${r.drink1}</b></div>
+                    <div>中级酒水: <b>${r.drink2}</b></div>
+                    <div>高级酒水: <b>${r.drink3}</b></div>
+                    <div>顶级酒水: <b>${r.drink4}</b></div>
+                    `;
+                }else{
+                    document.getElementById('memberBalanceShow').innerText = '¥0.00';
+                    document.getElementById('memberRightsPreview').classList.add('hidden');
+                }
+                calcTotal();
+            }
+        }
+
+        function fillConsumeMember(){
+            let sel = document.getElementById('consumeMemberSelect');
+            let opt = '<option value="">选择会员</option>';
+            members.forEach(m=>opt += `<option value="${m.id}">${m.name} - ${m.phone}</option>`);
+            sel.innerHTML = opt;
+            document.getElementById('memberBalanceShow').innerText = '¥0.00';
+            document.getElementById('memberRightsPreview').classList.add('hidden');
+        }
+
+        function fillConsumeProduct(){
+            let allSel = document.querySelectorAll('.consume-product');
+            let opt = '<option value="">选择项目</option>';
+            products.filter(p=>p.status==='active').forEach(p=>{
+                opt += `<option value="${p.id}" data-price="${p.price}" data-rt="${p.rightType||''}">${p.name}</option>`;
+            });
+            allSel.forEach(s=>s.innerHTML = opt);
+        }
+
+        function addConsumeRow(){
+            let box = document.getElementById('consumeItemBox');
+            let row = document.createElement('div');
+            row.className = 'flex flex-wrap gap-3 item-row';
+            row.innerHTML = `<select class="input-field flex-1 min-w-[200px] consume-product">
+            <option value="">选择项目</option></select>
+            <input type="number" min="1" value="1" class="input-field w-24 consume-num">
+            <select class="input-field w-32 consume-pay-type">
+            <option value="balance">扣余额(现金)</option>
+            <option value="rights">扣赠送权益(领取)</option>
+            </select>
+            <span class="self-center price-text w-20 text-gray-600">¥0.00</span>
+            <button class="btn-danger del-row">删除</button>`;
+            box.appendChild(row);fillConsumeProduct();
+        }
+
+        function calcTotal(){
+            let balanceTotal = 0;
+            let rows = document.querySelectorAll('.item-row');
+            rows.forEach(row=>{
+                let s = row.querySelector('.consume-product');
+                let num = +row.querySelector('.consume-num').value||0;
+                let price = +s.selectedOptions[0].dataset.price||0;
+                let pay = row.querySelector('.consume-pay-type').value;
+                let rowTotal = price * num;
+                row.querySelector('.price-text').innerText = `¥${rowTotal.toFixed(2)}`;
+                if(pay==='balance') balanceTotal += rowTotal;
+            });
+            document.getElementById('deductBalanceMoney').innerText = `¥${balanceTotal.toFixed(2)}`;
+        }
+
+        function submitConsume(){
+            let mid = +document.getElementById('consumeMemberSelect').value;
+            if(!mid){showToast('请先选择会员');return;}
+            let member = members.find(m=>m.id===mid);
+            if(!member)return;
+            let rows = document.querySelectorAll('.item-row');
+            let deductBalance = 0;
+            let deductR = {fruit:0,snack:0,drink1:0,drink2:0,drink3:0,drink4:0};
+            let pass = true;
+
+            rows.forEach(row=>{
+                let pid = +row.querySelector('.consume-product').value;
+                if(!pid)return;
+                let num = +row.querySelector('.consume-num').value||0;
+                let pay = row.querySelector('.consume-pay-type').value;
+                let p = products.find(x=>x.id===pid);
+                if(!p)return;
+
+                if(pay === 'rights'){
+                    if(!p.rightType){
+                        showToast('该项目不可用赠送权益领取，请切换为扣余额');
+                        pass = false;return;
+                    }
+                    if(p.rightType === 'fruit') deductR.fruit += num;
+                    if(p.rightType === 'snack') deductR.snack += num;
+                    if(p.rightType === 'drink1') deductR.drink1 += num;
+                    if(p.rightType === 'drink2') deductR.drink2 += num;
+                    if(p.rightType === 'drink3') deductR.drink3 += num;
+                    if(p.rightType === 'drink4') deductR.drink4 += num;
+                }else{
+                    deductBalance += p.price * num;
+                }
+            });
+            if(!pass)return;
+            
+            if(deductBalance > member.balance){
+                showToast('账户余额不足，无法结算');return;
+            }
+            
+            let r = member.rights;
+            // 修复：果盘/小吃扣减验证逻辑
+            // 只有非999的卡才验证数量是否足够，999的卡不验证（不限量）
+            if(r.fruit !== 999 && (r.fruit - deductR.fruit) < 0){
+                showToast('果盘数量不足');return;
+            }
+            if(r.snack !== 999 && (r.snack - deductR.snack) < 0){
+                showToast('小吃数量不足');return;
+            }
+            // 酒水正常验证
+            if(r.drink1 - deductR.drink1 < 0){showToast('基础酒水数量不足');return;}
+            if(r.drink2 - deductR.drink2 < 0){showToast('中级酒水数量不足');return;}
+            if(r.drink3 - deductR.drink3 < 0){showToast('高级酒水数量不足');return;}
+            if(r.drink4 - deductR.drink4 < 0){showToast('顶级酒水数量不足');return;}
+
+            // 执行扣减（修复核心：999的卡不扣减，非999的卡正常扣减）
+            member.balance = Number((member.balance - deductBalance).toFixed(2));
+            // 果盘扣减：999不扣，否则正常扣
+            r.fruit = r.fruit === 999 ? 999 : (r.fruit - deductR.fruit);
+            // 小吃扣减：999不扣，否则正常扣
+            r.snack = r.snack === 999 ? 999 : (r.snack - deductR.snack);
+            // 酒水正常扣减
+            r.drink1 -= deductR.drink1;
+            r.drink2 -= deductR.drink2;
+            r.drink3 -= deductR.drink3;
+            r.drink4 -= deductR.drink4;
+
+            localStorage.setItem('members',JSON.stringify(members));
+            renderMember();fillConsumeMember();
+            document.getElementById('memberBalanceShow').innerText = `¥${member.balance.toFixed(2)}`;
+            document.getElementById('rightsPreviewBox').innerHTML = `
+            <div>果盘: <b>${r.fruit}</b></div>
+            <div>小吃: <b>${r.snack}</b></div>
+            <div>基础酒水: <b>${r.drink1}</b></div>
+            <div>中级酒水: <b>${r.drink2}</b></div>
+            <div>高级酒水: <b>${r.drink3}</b></div>
+            <div>顶级酒水: <b>${r.drink4}</b></div>
+            `;
+            
+            let list = document.querySelectorAll('.item-row');
+            for(let i=1;i<list.length;i++) list[i].remove();
+            list[0].querySelector('.consume-product').value = '';
+            list[0].querySelector('.consume-num').value = 1;
+            list[0].querySelector('.consume-pay-type').value = 'balance';
+            calcTotal();
+            showToast('结算成功，权益/余额已扣除');
+        }
+
+        function showToast(msg){
+            toast.innerText = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(()=>toast.classList.add('translate-x-full'),2500);
+        }
+    </script>
+</body>
+</html>
