@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>会员卡管理系统-权限版（修复果盘小吃扣减）</title>
+    <title>会员卡管理系统-权限版（最终版）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -107,11 +107,13 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full min-w-[800px]">
+                        <table class="w-full min-w-[900px]">
                             <thead>
                                 <tr class="border-b">
                                     <th class="py-3 px-4 text-left text-sm text-gray-500">会员信息</th>
                                     <th class="py-3 px-4 text-left text-sm text-gray-500">卡类型</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">密码</th>
+                                    <th class="py-3 px-4 text-left text-sm text-gray-500">使用范围</th>
                                     <th class="py-3 px-4 text-left text-sm text-gray-500">账户余额</th>
                                     <th class="py-3 px-4 text-left text-sm text-gray-500">果盘</th>
                                     <th class="py-3 px-4 text-left text-sm text-gray-500">小吃</th>
@@ -250,6 +252,14 @@
                         <input type="tel" id="memberPhone" class="input-field" required>
                     </div>
                     <div class="mb-3">
+                        <label class="block text-sm mb-1">会员卡密码</label>
+                        <input type="text" id="memberPwd" class="input-field" placeholder="仅记录，无登录功能">
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">使用范围</label>
+                        <input type="text" id="memberScope" class="input-field" placeholder="例如：仅限XX门店使用">
+                    </div>
+                    <div class="mb-3">
                         <label class="block text-sm mb-1">会员卡类型</label>
                         <select id="memberTypeSelect" class="input-field" required></select>
                     </div>
@@ -278,6 +288,14 @@
                     <div class="mb-3">
                         <label class="block text-sm mb-1">手机号</label>
                         <input type="tel" id="editMemberPhone" class="input-field" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">会员卡密码</label>
+                        <input type="text" id="editMemberPwd" class="input-field" placeholder="仅记录，无登录功能">
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm mb-1">使用范围</label>
+                        <input type="text" id="editMemberScope" class="input-field" placeholder="例如：仅限XX门店使用">
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm mb-1">会员卡类型</label>
@@ -540,7 +558,7 @@
             renderProduct();
         }
 
-        // ========== 会员管理 ==========
+        // ========== 会员管理（新增密码/使用范围字段） ==========
         function renderMember(list=members){
             const box = document.getElementById('memberList');
             const empty = document.getElementById('noMembers');
@@ -559,6 +577,8 @@
                 html += `<tr class="border-b hover:bg-gray-50">
                 <td class="py-3 px-4">${m.name}<br><span class="text-xs text-gray-500">${m.phone}</span></td>
                 <td class="py-3 px-4"><span class="badge badge-blue">${m.typeName}</span></td>
+                <td class="py-3 px-4">${m.pwd || '-'}</td>
+                <td class="py-3 px-4">${m.scope || '-'}</td>
                 <td class="py-3 px-4 font-medium">¥${m.balance.toFixed(2)}</td>
                 <td class="py-3 px-4">${r.fruit}</td>
                 <td class="py-3 px-4">${r.snack}</td>
@@ -572,16 +592,18 @@
             box.innerHTML = html;
         }
 
-        // 添加会员
+        // 添加会员（新增密码/使用范围）
         document.getElementById('addMemberForm').onsubmit = function(e){
             e.preventDefault();
             let name = document.getElementById('memberName').value.trim();
             let phone = document.getElementById('memberPhone').value.trim();
+            let pwd = document.getElementById('memberPwd').value.trim(); // 新增密码
+            let scope = document.getElementById('memberScope').value.trim(); // 新增使用范围
             let typeId = +document.getElementById('memberTypeSelect').value;
             let balance = +document.getElementById('memberBalance').value;
             let type = memberTypes.find(t=>t.id===typeId);
             members.push({
-                id:Date.now(),name,phone,typeId,typeName:type.name,balance,
+                id:Date.now(),name,phone,pwd,scope,typeId,typeName:type.name,balance, // 保存新字段
                 rights:{fruit:type.fruit,snack:type.snack,drink1:type.drink1,drink2:type.drink2,drink3:type.drink3,drink4:type.drink4}
             });
             localStorage.setItem('members',JSON.stringify(members));
@@ -608,7 +630,7 @@
         // 打开添加会员弹窗
         document.getElementById('addMemberBtn').onclick = ()=>document.getElementById('addMemberModal').classList.remove('hidden');
 
-        // 编辑会员
+        // 编辑会员（新增密码/使用范围）
         window.editMember = function(id){
             let m = members.find(x=>x.id===id);
             if(!m)return;
@@ -616,6 +638,8 @@
             document.getElementById('editMemberId').value = m.id;
             document.getElementById('editMemberName').value = m.name;
             document.getElementById('editMemberPhone').value = m.phone;
+            document.getElementById('editMemberPwd').value = m.pwd || ''; // 回显密码
+            document.getElementById('editMemberScope').value = m.scope || ''; // 回显使用范围
             document.getElementById('editMemberBalance').value = m.balance;
             document.getElementById('editFruit').value = r.fruit;
             document.getElementById('editSnack').value = r.snack;
@@ -633,12 +657,14 @@
             document.getElementById('editMemberModal').classList.remove('hidden');
         }
 
-        // 提交编辑会员
+        // 提交编辑会员（保存密码/使用范围）
         document.getElementById('editMemberForm').onsubmit = function(e){
             e.preventDefault();
             let id = +document.getElementById('editMemberId').value;
             let name = document.getElementById('editMemberName').value.trim();
             let phone = document.getElementById('editMemberPhone').value.trim();
+            let pwd = document.getElementById('editMemberPwd').value.trim(); // 新增密码
+            let scope = document.getElementById('editMemberScope').value.trim(); // 新增使用范围
             let typeId = +document.getElementById('editMemberTypeSelect').value;
             let balance = +document.getElementById('editMemberBalance').value;
             let fruit = +document.getElementById('editFruit').value;
@@ -651,7 +677,7 @@
 
             let idx = members.findIndex(m=>m.id===id);
             members[idx] = {
-                id,name,phone,typeId,typeName:type.name,balance,
+                id,name,phone,pwd,scope,typeId,typeName:type.name,balance, // 保存新字段
                 rights:{fruit,snack,drink1,drink2,drink3,drink4}
             };
             localStorage.setItem('members',JSON.stringify(members));
@@ -740,7 +766,7 @@
             document.getElementById('addMemberTypeModal').classList.remove('hidden');
         }
 
-        // ========== 消费项目 ==========
+        // ========== 消费项目（新增删除功能，仅老板可用） ==========
         function renderProduct(list=products){
             const box = document.getElementById('productList');
             const empty = document.getElementById('noProducts');
@@ -751,15 +777,33 @@
                 let rt = p.rightType||"普通消费";
                 let st = p.status==='active'?"启用":"停用";
                 let sc = p.status==='active'?"badge-success":"badge-danger";
+                // 仅老板显示删除按钮
+                let operateBtn = `<button class="btn-outline py-1 px-3 text-xs" onclick="editProduct(${p.id})">编辑</button>`;
+                if(currentRole === 'boss'){
+                    operateBtn += `<button class="btn-danger py-1 px-3 text-xs ml-2" onclick="delProduct(${p.id})">删除</button>`;
+                }
                 html += `<tr class="border-b hover:bg-gray-50">
                 <td class="py-3 px-4">${p.name}</td>
                 <td class="py-3 px-4">¥${p.price.toFixed(2)}</td>
                 <td class="py-3 px-4">${rt||"普通消费"}</td>
                 <td class="py-3 px-4"><span class="badge ${sc}">${st}</span></td>
-                <td class="py-3 px-4 text-right"><button class="btn-outline py-1 px-3 text-xs" onclick="editProduct(${p.id})">编辑</button></td>
+                <td class="py-3 px-4 text-right">${operateBtn}</td>
                 </tr>`;
             });
             box.innerHTML = html;
+        }
+
+        // 删除消费项目（仅老板可用）
+        window.delProduct = function(id){
+            if(currentRole !== 'boss'){
+                showToast('仅老板可删除消费项目');
+                return;
+            }
+            if(!confirm('确定删除该消费项目？删除后不可恢复'))return;
+            products = products.filter(p=>p.id!==id);
+            localStorage.setItem('products',JSON.stringify(products));
+            renderProduct();
+            showToast('消费项目已删除');
         }
 
         document.getElementById('addProductForm').onsubmit = function(e){
@@ -947,9 +991,9 @@
 
             // 执行扣减（修复核心：999的卡不扣减，非999的卡正常扣减）
             member.balance = Number((member.balance - deductBalance).toFixed(2));
-            // 果盘扣减：999不扣，否则正常扣
+            // 果盘扣减：999保持不变，非999正常扣减
             r.fruit = r.fruit === 999 ? 999 : (r.fruit - deductR.fruit);
-            // 小吃扣减：999不扣，否则正常扣
+            // 小吃扣减：999不扣，否则正常扣减
             r.snack = r.snack === 999 ? 999 : (r.snack - deductR.snack);
             // 酒水正常扣减
             r.drink1 -= deductR.drink1;
