@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>会员卡管理系统 - 云端版</title>
+    <title>会员卡管理系统 - 多人同步版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -41,7 +41,7 @@
         <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
             <div class="text-center mb-6">
                 <i class="fa fa-credit-card text-primary text-4xl mb-3"></i>
-                <h1 class="text-2xl font-bold text-gray-800">会员卡管理系统</h1>
+                <h3 class="text-lg font-bold mb-4">会员卡管理系统</h3>
                 <p class="text-gray-500 mt-1">请输入登录密码</p>
             </div>
             <form id="loginForm">
@@ -383,9 +383,9 @@
     </div>
 
     <script>
-        // ========== 已填好你的配置，直接使用 ==========
-        const GIST_ID = "227f80846dfe7e36670dc65d1ef3147e";
-        const GITHUB_TOKEN = "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";
+        // ========== 多人同步云端存储配置（跨域可用，手机/电脑通用） ==========
+        const API_URL = "https://api.jsonbin.io/v3/b/68369706ad19bd6421ccb4672";
+        const API_MASTER_KEY = "$2a$10$lR8Gz2r9X7sQ6aF4dJ8cKeO9bN7mP0qR1sT2uV3wX4yZ5aB6cD7eF8gH9jK";
 
         let currentRole = '';
         let members = [];
@@ -394,24 +394,25 @@
         const toast = document.getElementById('toast');
 
         document.addEventListener('DOMContentLoaded', async function () {
-            await loadAllDataFromGist();
+            await loadAllDataFromCloud();
             initLogin();
             bindModalClose();
         });
 
-        // 从Gist读取云端数据
-        async function loadAllDataFromGist() {
+        // 从云端读取数据（多人共用同一份数据）
+        async function loadAllDataFromCloud() {
             try {
-                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                const res = await fetch(API_URL, {
+                    headers: { "X-Master-Key": API_MASTER_KEY }
                 });
-                const data = await res.json();
-                const json = JSON.parse(data.files['data.json'].content);
-                
-                members = json.members || [];
-                memberTypes = json.cardTypes || [];
-                products = json.products || [];
+                const jsonData = await res.json();
+                const data = jsonData.record || {};
 
+                members = data.members || [];
+                memberTypes = data.cardTypes || [];
+                products = data.products || [];
+
+                // 数据类型格式化
                 members = members.map(m => ({
                     ...m,
                     id: Number(m.id),
@@ -426,34 +427,54 @@
 
                 showSystem();
             } catch (e) {
-                console.error(e);
-                showToast("加载云端数据失败，请检查网络与Token权限");
+                console.error("数据加载失败：", e);
+                showToast("❌ 加载云端数据失败，请检查网络");
+                // 初始化默认卡类型和项目（首次使用）
+                initDefaultData();
+                showSystem();
             }
         }
 
-        // 保存数据到Gist云端
-        async function saveDataToGist() {
+        // 保存数据到云端（修改后全员同步）
+        async function saveDataToCloud() {
             try {
-                const content = JSON.stringify({
+                const bodyData = {
                     members,
                     cardTypes: memberTypes,
                     products
-                }, null, 2);
-
-                await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
+                };
+                await fetch(API_URL, {
+                    method: 'PUT',
                     headers: {
-                        Authorization: `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json",
+                        "X-Master-Key": API_MASTER_KEY
                     },
-                    body: JSON.stringify({
-                        files: { "data.json": { content } }
-                    })
+                    body: JSON.stringify(bodyData)
                 });
-                showToast("✅ 数据已同步到云端");
+                showToast("✅ 数据已同步云端");
             } catch (e) {
                 showToast("❌ 云端同步失败");
             }
+        }
+
+        // 首次使用初始化默认数据
+        function initDefaultData() {
+            memberTypes = [
+                {id:1,name:"普通卡",scope:"通用",fruit:0,snack:0,drink1:0,drink2:0,drink3:0,drink4:0},
+                {id:2,name:"银卡",scope:"通用",fruit:1,snack:2,drink1:5,drink2:0,drink3:0,drink4:0},
+                {id:3,name:"金卡",scope:"通用",fruit:2,snack:5,drink1:10,drink2:3,drink3:0,drink4:0},
+                {id:4,name:"钻石卡",scope:"通用",fruit:5,snack:10,drink1:20,drink2:10,drink3:5,drink4:1}
+            ];
+            products = [
+                {id:1,name:"精品果盘",type:0,price:38},
+                {id:2,name:"特色小吃",type:1,price:25},
+                {id:3,name:"基础啤酒",type:2,price:12},
+                {id:4,name:"中级洋酒",type:3,price:88},
+                {id:5,name:"高级红酒",type:4,price:268},
+                {id:6,name:"顶级威士忌",type:5,price:688}
+            ];
+            members = [];
+            saveDataToCloud();
         }
 
         // 登录逻辑
@@ -671,7 +692,7 @@
                 drink4: type.drink4
             };
             members.push(newMember);
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
             this.reset();
             document.getElementById('addMemberModal').classList.add('hidden');
@@ -705,7 +726,7 @@
             m.typeName = memberTypes.find(t=>t.id===m.typeId).name;
             m.balance = +document.getElementById('editMemberBalance').value;
 
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
             document.getElementById('editMemberModal').classList.add('hidden');
         };
@@ -714,7 +735,7 @@
         window.delMember = async function(id) {
             if(!confirm('确定删除该会员？')) return;
             members = members.filter(m => m.id !== id);
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
         };
 
@@ -736,7 +757,7 @@
                 drink4: +document.getElementById('typeDrink4').value
             };
             memberTypes.push(newType);
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
             this.reset();
             document.getElementById('addTypeModal').classList.add('hidden');
@@ -755,7 +776,7 @@
                 price: +document.getElementById('productPrice').value
             };
             products.push(newPro);
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
             this.reset();
             document.getElementById('addProductModal').classList.add('hidden');
@@ -765,7 +786,7 @@
         window.delProduct = async function(id) {
             if(!confirm('确定删除？')) return;
             products = products.filter(p => p.id !== id);
-            await saveDataToGist();
+            await saveDataToCloud();
             renderAll();
         };
 
@@ -849,7 +870,7 @@
                 if(m.balance < totalPay) return showToast("会员余额不足");
 
                 m.balance -= totalPay;
-                await saveDataToGist();
+                await saveDataToCloud();
                 renderAll();
                 box.innerHTML = `
                 <div class="flex flex-wrap gap-3 item-row">
@@ -943,6 +964,7 @@
                     </td>
                 </tr>`;
             });
+            box.innerHTML = html;
             box.innerHTML = html;
         };
     </script>
